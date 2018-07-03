@@ -45,7 +45,6 @@ def main_route():
         return "No json received"
 
 def main_process(json_data):
-    values = []
     data = {'status' : '200', 'itens' : json_data}
     return jsonify(data)
 
