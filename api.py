@@ -44,9 +44,11 @@ def main_route():
     else:
         return "No json received"
 
-def main_process(json_data):
-    data = {'status' : '200', 'itens' : json_data}
-    return jsonify(data)
-
 if __name__ == "__main__":
 	app.run("0.0.0.0",use_reloader=True,port=9900)
+
+class ResultCallback(CallbackBase):
+    def main_callback_on_ok(self, result, **kwargs):
+        host = result._host
+        data = {'status' : '200', 'itens' : host}
+        return jsonify(data)
