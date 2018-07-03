@@ -6,7 +6,14 @@ import sys
 import operator
 import json
 
-import requests
+from collections import namedtuple
+from ansible.parsing.dataloader import DataLoader
+from ansible.vars import VariableManager
+from ansible.inventory import Inventory
+from ansible.playbook.play import Play
+from ansible.executor.task_queue_manager import TaskQueueManager
+from ansible.plugins.callback import CallbackBase
+
 from flask import Flask, make_response, request, Response, jsonify
 from flask_httpauth import HTTPTokenAuth
 
@@ -43,6 +50,9 @@ def main_route():
         return firesult
     else:
         return "No json received"
+
+def main_process(json_data):
+
 
 if __name__ == "__main__":
 	app.run("0.0.0.0",use_reloader=True,port=9900)
