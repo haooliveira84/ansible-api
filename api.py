@@ -6,26 +6,12 @@ import sys
 import operator
 import json
 import logging
-
-from collections import namedtuple
-from ansible import playbook, callbacks
-from ansible.parsing.dataloader import DataLoader
-from ansible.vars import VariableManager
-from ansible.inventory import Inventory
-from ansible.playbook.play import Play
-from ansible.executor.task_queue_manager import TaskQueueManager
-from ansible.plugins.callback import CallbackBase
+from listroles import listRoles
 
 from flask import Flask, make_response, request, Response, jsonify
 from flask_httpauth import HTTPTokenAuth
 
-class ResultCallback(CallbackBase):
-    def main_callback_on_ok(self, result, **kwargs):
-        host = result._host
-        data = {'status' : '200', 'itens' : host}
-        return jsonify(data)
-
-class LoggingCallbacks(callbacks.PlaybookCallbacks):
+class LoggingCallbacks(Flask):
     def log(self, level, msg, *args, **kwargs):
         logging.log(level, msg, *args, **kwargs)
 
@@ -53,21 +39,39 @@ def not_found(error=None):
 
 @app.route('/', methods = ['GET'])
 def index():
-    """Welcome to Ansible API"""
+    """Welcome to BySeven Ansible API"""
     return jsonify({'hello': 'What would you like to automate today?'})
 
-@app.route('/api', methods=['GET', 'POST'])
+@app.route('/api', methods=['GET'])
 @auth.login_required
-def main_route():
-    if request.json:
-        json_data = request.get_json()
-        firesult = main_process(json_data)
-        return firesult
-    else:
-        return "No json received"
+def api_index():
+    """These are the available APIS."""
+    func_list = {}
+    for rule in app.url_map.iter_rules():
+        if rule.endpoint != 'static':
+            func_list[rule.rule] = app.view_functions[rule.endpoint].__doc__
+    return jsonify(func_list)
 
-def main_process(json_data):
-    results_callback = ResultCallback()
+@app.route('/api/roles/', methods = ['GET'])
+def getRoles():
+    """A list of installed Roles"""
+    return jsonify(listRoles(ROLES_DIR))
+
+@app.route('/api/roles/github/get', methods = ['GET','POST'])
+def getRole():
+    """Run an Ansible Playbook"""
+    if request.method == 'POST':
+        r_u = request.values.get("username")
+        r_r = request.values.get("role")
+        process = subprocess.Popen(["/usr/bin/git", "clone", "https://git.byseven.com.br/byseven/Automation/Ansible/playbooks/"+ str(r_u) + '/' + str(r_r) + ".git", os.path.join(ROLES_DIR,r_r)])
+        return jsonify({'RunningPlay': {'name': r_r}})
+    else:
+       return '''Currently only github is supported
+curl --request POST \
+  --url http://127.0.0.1:8080/api/run/ \
+  --data 'username=donnydavis' \
+  --data 'role=ansible-rh-subscription-manager'
+       '''
 
 if __name__ == "__main__":
 	app.run("0.0.0.0",use_reloader=True,port=9900)
