@@ -6,6 +6,10 @@ import sys
 import operator
 import json
 import logging
+import settings
+from settings import ROLES_DIR
+import subprocess
+
 from listroles import listRoles
 
 from flask import Flask, make_response, request, Response, jsonify
@@ -57,7 +61,7 @@ def getRoles():
     """A list of installed Roles"""
     return jsonify(listRoles(ROLES_DIR))
 
-@app.route('/api/roles/github/get', methods = ['GET','POST'])
+@app.route('/api/roles/gitlab/get', methods = ['GET','POST'])
 def getRole():
     """Run an Ansible Playbook"""
     if request.method == 'POST':
@@ -71,6 +75,24 @@ curl -XPOST \
   -H 'Authorization: Token Tr8DN93e6MFCrH8fO0BASrRtbTTjDJ5X'
   http://127.0.0.1:9900/api/run/ \
   --data 'role=ping'
+       '''
+
+@app.route('/api/run/', methods = ['GET','POST'])
+def runPlay():
+    """Run an Ansible Playbook"""
+    if request.method == 'POST':
+        p = request.values.get("play")
+        r = request.values.get("role")
+        h = request.values.get("host")
+        process = subprocess.Popen(["/usr/bin/ansible-playbook", "--limit=" + str(h), os.path.join(ROLES_DIR,r,p)])
+        return jsonify({'RunningPlay': {'name': p}})
+    else:
+       return '''To use this API
+curl -XPOST \
+  --url http://127.0.0.1:8080/api/run/ \
+  --data 'role=test' \
+  --data 'play=hello.yml' \
+  --data 'host=localhost'
        '''
 
 if __name__ == "__main__":

@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-import settings
-
+from settings import IGNORED_FILES
 
 def listRoles(path):
     d = {'name': os.path.basename(path)}
