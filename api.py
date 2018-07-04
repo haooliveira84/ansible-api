@@ -15,13 +15,6 @@ from listroles import listRoles
 from flask import Flask, make_response, request, Response, jsonify
 from flask_httpauth import HTTPTokenAuth
 
-class LoggingCallbacks(Flask):
-    def log(self, level, msg, *args, **kwargs):
-        logging.log(level, msg, *args, **kwargs)
-
-    def on_task_start(self, name, is_conditional):
-        self.log(logging.INFO, 'task: {0}'.format(name))
-        super(LoggingCallbacks, self).on_task_start(name, is_conditional)
 
 app = Flask(__name__)
 auth = HTTPTokenAuth("Token")
@@ -56,7 +49,7 @@ def api_index():
             func_list[rule.rule] = app.view_functions[rule.endpoint].__doc__
     return jsonify(func_list)
 
-@app.route('/api/roles/', methods = ['GET'])
+@app.route('/api/roles', methods = ['GET'])
 @auth.login_required
 def getRoles():
     """A list of installed Roles"""
@@ -72,7 +65,7 @@ def getRole():
             git.cmd.Git(ROLES_DIR + "/" + r_r).pull
         else:
             git.Git(ROLES_DIR).clone("https://oauth2:xSSwv5yWh1Qc8CVHGZih@git.byseven.com.br/byseven/Automation/Ansible/playbooks/" + "/" + str(r_r) + ".git")
-        return jsonify({'RunningPlay': {'name': r_r}})
+        return jsonify({'Working in git repo': {'name': r_r}})
     else:
        return '''Currently only BySeven GitLab is supported
 curl -XPOST \
@@ -89,8 +82,9 @@ def runPlay():
         p = request.values.get("play")
         r = request.values.get("role")
         h = request.values.get("host")
-        process = subprocess.Popen(["/usr/bin/ansible-playbook", "--limit=" + str(h), os.path.join(ROLES_DIR,r,p)])
-        return jsonify({'RunningPlay': {'name': p}})
+        process = subprocess.Popen(["/usr/local/bin/ansible-playbook", os.path.join(ROLES_DIR,r,p), "-i " + str(h) + ","], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout = process.communicate()[0]
+        return stdout
     else:
        return '''To use this API
 curl -XPOST \
