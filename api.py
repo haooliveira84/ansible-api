@@ -66,11 +66,11 @@ def getRole():
         process = subprocess.Popen(["/usr/bin/git", "clone", "https://git.byseven.com.br/byseven/Automation/Ansible/playbooks/"+ str(r_u) + '/' + str(r_r) + ".git", os.path.join(ROLES_DIR,r_r)])
         return jsonify({'RunningPlay': {'name': r_r}})
     else:
-       return '''Currently only github is supported
-curl --request POST \
-  --url http://127.0.0.1:8080/api/run/ \
-  --data 'username=donnydavis' \
-  --data 'role=ansible-rh-subscription-manager'
+       return '''Currently only BySeven GitLab is supported
+curl -XPOST \
+  -H 'Authorization: Token Tr8DN93e6MFCrH8fO0BASrRtbTTjDJ5X'
+  http://127.0.0.1:9900/api/run/ \
+  --data 'role=ping'
        '''
 
 if __name__ == "__main__":
