@@ -67,7 +67,7 @@ def getRole():
     if request.method == 'POST':
         r_u = request.values.get("username")
         r_r = request.values.get("role")
-        process = subprocess.Popen(["/usr/bin/git", "clone", "https://git.byseven.com.br/byseven/Automation/Ansible/playbooks/"+ str(r_u) + '/' + str(r_r) + ".git", os.path.join(ROLES_DIR,r_r)])
+        process = subprocess.Popen(["/usr/bin/git", "clone", "https://git.byseven.com.br/byseven/Automation/Ansible/playbooks/"+ '/' + str(r_r) + ".git", os.path.join(ROLES_DIR,r_r)])
         return jsonify({'RunningPlay': {'name': r_r}})
     else:
        return '''Currently only BySeven GitLab is supported
