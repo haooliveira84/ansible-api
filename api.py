@@ -57,17 +57,18 @@ def api_index():
     return jsonify(func_list)
 
 @app.route('/api/roles/', methods = ['GET'])
+@auth.login_required
 def getRoles():
     """A list of installed Roles"""
     return jsonify(listRoles(ROLES_DIR))
 
 @app.route('/api/roles/gitlab/get', methods = ['GET','POST'])
+@auth.login_required
 def getRole():
     """Run an Ansible Playbook"""
     if request.method == 'POST':
-        r_u = request.values.get("username")
         r_r = request.values.get("role")
-        process = subprocess.Popen(["/usr/bin/git", "clone", "https://git.byseven.com.br/byseven/Automation/Ansible/playbooks/"+ '/' + str(r_r) + ".git", os.path.join(ROLES_DIR,r_r)])
+        process = subprocess.Popen(["/usr/bin/git", "clone", "https://oauth2:xSSwv5yWh1Qc8CVHGZih@git.byseven.com.br/byseven/Automation/Ansible/playbooks/"+ '/' + str(r_r) + ".git", os.path.join(ROLES_DIR,r_r)])
         return jsonify({'RunningPlay': {'name': r_r}})
     else:
        return '''Currently only BySeven GitLab is supported
@@ -78,6 +79,7 @@ curl -XPOST \
        '''
 
 @app.route('/api/run/', methods = ['GET','POST'])
+@auth.login_required
 def runPlay():
     """Run an Ansible Playbook"""
     if request.method == 'POST':
