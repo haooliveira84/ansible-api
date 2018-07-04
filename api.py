@@ -6,7 +6,7 @@ import sys
 import operator
 import json
 import logging
-import settings
+import git
 from settings import ROLES_DIR
 import subprocess
 
@@ -68,7 +68,10 @@ def getRole():
     """Run an Ansible Playbook"""
     if request.method == 'POST':
         r_r = request.values.get("role")
-        process = subprocess.Popen(["/usr/bin/git", "clone", "https://oauth2:xSSwv5yWh1Qc8CVHGZih@git.byseven.com.br/byseven/Automation/Ansible/playbooks/"+ '/' + str(r_r) + ".git", os.path.join(ROLES_DIR,r_r)])
+        if os.path.exists(ROLES_DIR + "/" + r_r):
+            git.cmd.Git(ROLES_DIR + "/" + r_r).pull
+        else:
+            git.Git(ROLES_DIR).clone("https://oauth2:xSSwv5yWh1Qc8CVHGZih@git.byseven.com.br/byseven/Automation/Ansible/playbooks/" + "/" + str(r_r) + ".git")
         return jsonify({'RunningPlay': {'name': r_r}})
     else:
        return '''Currently only BySeven GitLab is supported
